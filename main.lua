@@ -10,10 +10,10 @@ local _H = display.contentHeight
 myParagraph = Wrapper:newParagraph({
 	text = "Corona's framework dramatically increase productivity. Tasks like animating objects in OpenGL or creating user-interface widgets take only one line of code, and changes are instantly viewable in the Corona Simulator. ",
 	width = 220,
-	--height = 80, -- fontSize will be calculated automatically if set 
-	font = "helvetica",
-	fontSize = 16,
-	--lineSpace = -5,
+	--height = 80, 			-- fontSize will be calculated automatically if set 
+	--font = "helvetica", 	-- make sure the selected font is installed on your system
+	fontSize = 14,
+	lineSpace = 5,
 	alignment  = "center"
 })
 myParagraph:setReferencePoint(display.TopCenterReferencePoint)
