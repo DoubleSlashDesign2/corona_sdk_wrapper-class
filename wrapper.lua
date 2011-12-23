@@ -79,7 +79,7 @@ function Wrapper:newParagraph(params)
 	
 	local w = 			params.width 		or 	_W * 0.9
 	local font = 		params.font 		or 	native.systemFont
-	local fontSize = 	params.font 		or 	_H / 30	
+	local fontSize = 	params.fontSize		or 	_H / 30	
 	local lineSpace	= 	params.lineSpace 	or 	0
 	local alignment	=	params.alignment	or "center"
 	
