@@ -34,3 +34,4 @@ rect:setStrokeColor(255,200)
 rect.strokeWidth = 1
 
 myParagraph:toFront()
+
