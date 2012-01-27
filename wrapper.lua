@@ -68,6 +68,9 @@
 local _W = display.contentWidth
 local _H = display.contentHeight
 
+local sFx = display.contentScaleX
+local sFy = display.contentScaleY
+
 local Wrapper = {}
 
 function Wrapper:newParagraph(params)
@@ -89,9 +92,11 @@ function Wrapper:newParagraph(params)
 	local temp
 	local tempWidth = 0
 
+
 	img = display.newRetinaText("H",0,0,font, fontSize)
-	cHeight = img.height
+	cHeight = img.height * sFy
 	img:removeSelf()
+
 
 	local function wrap()
 		local tempS1 = "" 	
@@ -106,7 +111,7 @@ function Wrapper:newParagraph(params)
 				tempS2 = tempS1 .. string.sub(t, index,i)
 				if i == #t then
 					img = display.newRetinaText(tempS2,0,0,font, fontSize)
-					temp = img.width
+					temp = img.width * sFx
 					img:removeSelf()
 					if temp > w then
 						if string.sub(tempS1, -1,-1) == " " then tempS1 = string.sub(tempS1, 1,-2) end
@@ -129,7 +134,7 @@ function Wrapper:newParagraph(params)
 				end
 				if count ~= 1 then
 					img = display.newRetinaText(tempS2,0,0,font, fontSize)
-					temp = img.width
+					temp = img.width * sFx
 					img:removeSelf()
 					if temp > w then
 						if string.sub(tempS1, -1,-1) == " " then tempS1 = string.sub(tempS1, 1,-2) end
@@ -157,7 +162,7 @@ function Wrapper:newParagraph(params)
 		fontSize = 6
 		while 1 do
 			img = display.newRetinaText("H",0,0,font, fontSize)
-			cHeight = img.height
+			cHeight = img.height * sFy
 			img:removeSelf()
 			group = wrap()
 			for i=1, group.numChildren do
@@ -175,7 +180,7 @@ function Wrapper:newParagraph(params)
 		fontSize = fontSize-1
 		print("Wrapper Class:: calculated fontsize: " .. fontSize)
 		img = display.newRetinaText("H",0,0,font, fontSize)
-		cHeight = img.height
+		cHeight = img.height * sFy
 		img:removeSelf()
 		group = wrap()	
 	
@@ -192,23 +197,27 @@ function Wrapper:newParagraph(params)
 	end
 	
 	function group:alignText(a)
+		local groupWidth = self.width
+		
 		if a == "center" then
 			for i=1, self.numChildren do
 				self[i]:setReferencePoint(display.TopCenterReferencePoint)
-				self[i].x = self.width/2
+				self[i].x = 0
 			end
+		
 		elseif a == "left" then
 			for i=1, self.numChildren do
 				self[i]:setReferencePoint(display.TopLeftReferencePoint)
-				self[i].x = 0
+				self[i].x = groupWidth / 2
+				
 			end
+			
 		elseif a == "right" then
 			for i=1, self.numChildren do
 				self[i]:setReferencePoint(display.TopRightReferencePoint)
-				self[i].x = self.width
+				self[i].x = groupWidth
 			end
 		end
-	end
 	
 	group:alignText(alignment)
 	return group
