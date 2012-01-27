@@ -218,7 +218,7 @@ function Wrapper:newParagraph(params)
 				self[i].x = groupWidth
 			end
 		end
-	
+	end
 	group:alignText(alignment)
 	return group
 end
