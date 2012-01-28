@@ -5,7 +5,13 @@
 --
 -- Version: 1.0
 --
--- last change: 22.12.2011
+-- Version 1.1
+-- 1) Fixed errors with content scaling.
+-- 2) Added a new feature: you can now use \n for line break
+-- 3) In fact of the content-scaling error, alignment can not longer changed with the align function. 
+--    Its now fix after initialization.
+--
+-- last change: 28.01.2012
 -- 
 ------------------------------------------------------------------------
 -- Restrictions
@@ -30,6 +36,8 @@
 --
 -- what you get with the newParagraph-function is a normal display-group with text objects inside,
 -- so certainly they can handeld as those.
+--
+-- use "\n" for line break
 --
 -- Study the samle-code and the parameter- and function-List for usage.
 --
@@ -92,11 +100,9 @@ function Wrapper:newParagraph(params)
 	local temp
 	local tempWidth = 0
 
-
 	img = display.newRetinaText("H",0,0,font, fontSize)
 	cHeight = img.height * sFy
 	img:removeSelf()
-
 
 	local function wrap()
 		local tempS1 = "" 	
@@ -105,45 +111,49 @@ function Wrapper:newParagraph(params)
 		local count = 1
 		local row = 0
 		local tmpGroup = display.newGroup()
+		local tA = {}
+		local gW = 0
+		local lf_flag = true
 		
 		for i=1, #t do
+
+			if string.byte(t,i) == 10 and i ~= #t then
+				if lf_flag == false then
+					if string.sub(tempS1, -1,-1) == " " then tempS1 = string.sub(tempS1, 1,-2) end
+					tA[#tA+1] = display.newRetinaText(tempS1,0,0,font, fontSize)
+					tempS1 = string.sub(t, index,i)
+				else
+					tA[#tA+1] = display.newRetinaText(" ",0,0,font, fontSize)
+				end
+			end
+			
 			if string.sub(t,i,i) == " " or string.sub(t,i,i) == "-" or i == #t then
+				lf_flag = false
 				tempS2 = tempS1 .. string.sub(t, index,i)
+				
 				if i == #t then
 					img = display.newRetinaText(tempS2,0,0,font, fontSize)
 					temp = img.width * sFx
 					img:removeSelf()
 					if temp > w then
 						if string.sub(tempS1, -1,-1) == " " then tempS1 = string.sub(tempS1, 1,-2) end
-						img = display.newRetinaText(tempS1,0,0,font, fontSize)
-						img:setReferencePoint(display.TopLeftReferencePoint)
-						img.y = row*cHeight+row*lineSpace
-						tmpGroup:insert(img)
-						img = display.newRetinaText(string.sub(t, index,i),0,0,font, fontSize)
-						img:setReferencePoint(display.TopLeftReferencePoint)
-						img.y = (row+1)*cHeight+(row+1)*lineSpace
-						tmpGroup:insert(img)
+						tA[#tA+1] = display.newRetinaText(tempS1,0,0,font, fontSize)
+						tA[#tA+1] = display.newRetinaText(string.sub(t, index,i),0,0,font, fontSize)
 						break
 					else
-						img = display.newRetinaText(tempS2,0,0,font, fontSize)
-						img:setReferencePoint(display.TopLeftReferencePoint)
-						img.y = row*cHeight+row*lineSpace
-						tmpGroup:insert(img)
+						tA[#tA+1] = display.newRetinaText(tempS2,0,0,font, fontSize)
 						break
 					end
 				end
+				
 				if count ~= 1 then
 					img = display.newRetinaText(tempS2,0,0,font, fontSize)
 					temp = img.width * sFx
 					img:removeSelf()
 					if temp > w then
 						if string.sub(tempS1, -1,-1) == " " then tempS1 = string.sub(tempS1, 1,-2) end
-						img = display.newRetinaText(tempS1,0,0,font, fontSize)
-						img:setReferencePoint(display.TopLeftReferencePoint)
-						img.y = row*cHeight+row*lineSpace
-						tmpGroup:insert(img)
+						tA[#tA+1] = display.newRetinaText(tempS1,0,0,font, fontSize)
 						tempS1 = string.sub(t, index,i)
-						row = row + 1
 						else
 							tempS1 = tempS2
 					end
@@ -154,6 +164,41 @@ function Wrapper:newParagraph(params)
 				count = count+1
 			end
 		end
+		
+		-- text alignment
+		for i=1, #tA do
+			if gW < tA[i].width * sFx then
+				gW = tA[i].width * sFx
+			end
+		end
+		
+		if alignment == "center" then
+			for i=1, #tA do
+				tA[i]:setReferencePoint(display.TopCenterReferencePoint)
+				tA[i].x = gW/2
+				tA[i].y = i*cHeight+i*lineSpace
+			end
+		
+		elseif alignment == "left" then
+			for i=1, #tA do
+				tA[i]:setReferencePoint(display.TopLeftReferencePoint)
+				tA[i].x = 0
+				tA[i].y = i*cHeight+i*lineSpace
+			end
+			
+		elseif alignment == "right" then
+			for i=1, #tA do
+				tA[i]:setReferencePoint(display.TopRightReferencePoint)
+				tA[i].x = gW
+				tA[i].y = i*cHeight+i*lineSpace
+			end
+		end 
+			
+		-- group	
+		for i=1, #tA do
+			tmpGroup:insert(tA[i])
+		end
+		
 		return tmpGroup
 	end
 	
@@ -167,7 +212,7 @@ function Wrapper:newParagraph(params)
 			group = wrap()
 			for i=1, group.numChildren do
 				if group[i].width > tempWidth then
-					tempWidth = group[i].width
+					tempWidth = group[i].width *sFx
 				end
 			end
 			if tempWidth > w or group.height > h then
@@ -196,30 +241,6 @@ function Wrapper:newParagraph(params)
 		end	
 	end
 	
-	function group:alignText(a)
-		local groupWidth = self.width
-		
-		if a == "center" then
-			for i=1, self.numChildren do
-				self[i]:setReferencePoint(display.TopCenterReferencePoint)
-				self[i].x = 0
-			end
-		
-		elseif a == "left" then
-			for i=1, self.numChildren do
-				self[i]:setReferencePoint(display.TopLeftReferencePoint)
-				self[i].x = groupWidth / 2
-				
-			end
-			
-		elseif a == "right" then
-			for i=1, self.numChildren do
-				self[i]:setReferencePoint(display.TopRightReferencePoint)
-				self[i].x = groupWidth
-			end
-		end
-	end
-	group:alignText(alignment)
 	return group
 end
 

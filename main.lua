@@ -2,6 +2,8 @@
 --
 -- Try different text, heights, widths, fontSizes etc.
 --
+-- Please read instruction at the top of the wrapper.lua file carefully
+--
 
 local Wrapper = require("wrapper")
 
@@ -10,13 +12,13 @@ local _H = display.contentHeight
 
 myParagraph = Wrapper:newParagraph({
 
-	text = "Corona's framework dramatically increase productivity. Tasks like animating objects in OpenGL or creating user-interface widgets take only one line of code, and changes are instantly viewable in the Corona Simulator.",
+	text = "Corona's framework dramatically increase productivity. \n\nTasks like animating objects in OpenGL or creating user-interface widgets take only one line of code, and changes are instantly viewable in the Corona Simulator.",
 	width = 200,
-	--height = 200, 			-- fontSize will be calculated automatically if set 
+	height = 200, 			-- fontSize will be calculated automatically if set 
 	--font = "helvetica", 	-- make sure the selected font is installed on your system
-	fontSize = 14,
-	lineSpace = 5,
-	alignment  = "left"
+	--fontSize = 14,
+	lineSpace = 2,
+	alignment  = "center"
 })
 myParagraph:setReferencePoint(display.TopCenterReferencePoint)
 myParagraph.x = _W/2
