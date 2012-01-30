@@ -3,15 +3,22 @@
 -- 						      Wrapper Class                           --
 ------------------------------------------------------------------------
 --
--- Version: 1.0
+-- v1.2
 --
--- Version 1.1
+------------------------------------------------------------------------
+-- changelog
+------------------------------------------------------------------------
+--
+-- v1.1
 -- 1) Fixed errors with content scaling.
 -- 2) Added a new feature: you can now use \n for line break
 -- 3) In fact of the content-scaling error, alignment can not longer changed with the align function. 
 --    Its now fix after initialization.
 --
--- last change: 28.01.2012
+-- v1.2
+-- 1) fixed bugs related to the new linebreak feature, should work now without limitations.
+--
+-- last change: 30.01.2012
 -- 
 ------------------------------------------------------------------------
 -- Restrictions
@@ -113,25 +120,66 @@ function Wrapper:newParagraph(params)
 		local tmpGroup = display.newGroup()
 		local tA = {}
 		local gW = 0
-		local lf_flag = true
 		
+		--delete all space-characters after and before line-breaks to avoid wrapping
 		for i=1, #t do
-
-			if string.byte(t,i) == 10 and i ~= #t then
-				if lf_flag == false then
-					if string.sub(tempS1, -1,-1) == " " then tempS1 = string.sub(tempS1, 1,-2) end
-					tA[#tA+1] = display.newRetinaText(tempS1,0,0,font, fontSize)
-					tempS1 = string.sub(t, index,i)
-				else
-					tA[#tA+1] = display.newRetinaText(" ",0,0,font, fontSize)
+			if string.byte(t,i) == 10 then
+				j=i+1
+				while 1 do
+					if string.sub(t,j,j) == " " then
+						j = j+1
+						t = string.sub(t,1,i) .. string.sub(t,j,#t)	
+					else
+						break
+					end
 				end
 			end
-			
-			if string.sub(t,i,i) == " " or string.sub(t,i,i) == "-" or i == #t then
-				lf_flag = false
+		end
+		for i=1, #t do
+			if string.byte(t,i) == 10 then
+				j=i-1
+				while 1 do
+					if string.sub(t,j,j) == " " then
+						j = j-1
+						t = string.sub(t,1,j) .. string.sub(t,i,#t)	
+					else
+						break
+					end
+				end
+			end
+		end
+
+						
+		for i=1, #t do
+			-- linebreaks
+			if string.byte(t,i) == 10 and i ~= #t then
+				if tempS1 == "" then
+					tA[#tA+1] = display.newRetinaText(string.sub(t, index,i),0,0,font, fontSize)
+					index = i+1
+					tempS1 = ""
+					lf_flag = 2
+				else
+					img = display.newRetinaText(tempS1 .. string.sub(t, index,i),0,0,font, fontSize)
+					temp = img.width * sFx
+					img:removeSelf()
+					if  temp > w then
+						tA[#tA+1] = display.newRetinaText(tempS1,0,0,font, fontSize)
+						tA[#tA+1] = display.newRetinaText(string.sub(t, index,i),0,0,font, fontSize)
+					else	
+						tA[#tA+1] = display.newRetinaText(tempS1 .. string.sub(t, index,i),0,0,font, fontSize)
+					end
+					index = i+1
+					tempS1 = ""
+				end
+			-- wrapping
+			elseif string.sub(t,i,i) == " " or string.sub(t,i,i) == "-" or i == #t then
 				tempS2 = tempS1 .. string.sub(t, index,i)
-				
-				if i == #t then
+				if tempS1 == "" then 
+					tempS1 = tempS2
+					if i == #t then
+						tA[#tA+1] = display.newRetinaText(string.sub(t, index,i),0,0,font, fontSize)
+					end
+				elseif i == #t then
 					img = display.newRetinaText(tempS2,0,0,font, fontSize)
 					temp = img.width * sFx
 					img:removeSelf()
@@ -144,9 +192,7 @@ function Wrapper:newParagraph(params)
 						tA[#tA+1] = display.newRetinaText(tempS2,0,0,font, fontSize)
 						break
 					end
-				end
-				
-				if count ~= 1 then
+				else
 					img = display.newRetinaText(tempS2,0,0,font, fontSize)
 					temp = img.width * sFx
 					img:removeSelf()
@@ -154,14 +200,11 @@ function Wrapper:newParagraph(params)
 						if string.sub(tempS1, -1,-1) == " " then tempS1 = string.sub(tempS1, 1,-2) end
 						tA[#tA+1] = display.newRetinaText(tempS1,0,0,font, fontSize)
 						tempS1 = string.sub(t, index,i)
-						else
-							tempS1 = tempS2
+					else
+						tempS1 = tempS2
 					end
-				else
-					tempS1 = tempS2
 				end
 				index = i+1
-				count = count+1
 			end
 		end
 		
