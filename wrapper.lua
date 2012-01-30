@@ -157,7 +157,6 @@ function Wrapper:newParagraph(params)
 					tA[#tA+1] = display.newRetinaText(string.sub(t, index,i),0,0,font, fontSize)
 					index = i+1
 					tempS1 = ""
-					lf_flag = 2
 				else
 					img = display.newRetinaText(tempS1 .. string.sub(t, index,i),0,0,font, fontSize)
 					temp = img.width * sFx
