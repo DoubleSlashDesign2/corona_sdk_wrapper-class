@@ -10,16 +10,24 @@ local Wrapper = require("wrapper")
 local _W = display.contentWidth
 local _H = display.contentHeight
 
+local t = system.getTimer()
+
 myParagraph = Wrapper:newParagraph({
 
-	text = "Wrapper Class sample-text:\n\nCorona's framework dramatically increase productivity. \n\nTasks like animating objects in OpenGL or creating user-interface widgets take only one line of code, and changes are instantly viewable in the Corona Simulator. \n\nYou can rapidly test without lengthy build times.",
+	text = "Wrapper Class Sample-Text\n\nCorona's framework dramatically increase productivity. \n\nTasks like animating objects in OpenGL or creating user-interface widgets take only one line of code, and changes are instantly viewable in the Corona Simulator. \n\nYou can rapidly test without lengthy build times.",
 	width = 240,
-	height = 300, 			-- fontSize will be calculated automatically if set 
+	--height = 240, 			-- fontSize will be calculated automatically if set 
 	--font = "helvetica", 	-- make sure the selected font is installed on your system
-	fontSize = 14,
+	fontSize = 14,			
 	lineSpace = 2,
-	alignment  = "left"
+	alignment  = "center",
+	fontSizeMin = 8,
+	incrementSize = 2
 })
+
+--displays the time needed for wrapping
+display.newText(tostring(system.getTimer() - t), 10, display.contentHeight - 22, nil, 20)
+
 myParagraph:setReferencePoint(display.TopCenterReferencePoint)
 myParagraph.x = _W/2
 myParagraph.y = 50

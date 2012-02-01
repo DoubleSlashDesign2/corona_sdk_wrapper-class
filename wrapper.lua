@@ -3,7 +3,7 @@
 -- 						      Wrapper Class                           --
 ------------------------------------------------------------------------
 --
--- v1.2
+-- v1.21
 --
 ------------------------------------------------------------------------
 -- changelog
@@ -18,7 +18,12 @@
 -- v1.2
 -- 1) fixed bugs related to the new linebreak feature, should work now without limitations.
 --
--- last change: 30.01.2012
+-- v1.21
+-- 1) little corrections
+-- 2) added new Parameters for speed tweaking (see parameter list)
+--
+--
+-- last change: 1.2.2012
 -- 
 ------------------------------------------------------------------------
 -- Restrictions
@@ -77,6 +82,12 @@
 -- alignment (optional, "center" by default)
 -- string. left, center or right
 --
+-- fontSizeMin (optional, 6 by default)
+-- number. This value is the start value for font-sizing if a height is set. Increase the number for speed improvement, but use with care.
+--  
+-- incrementSize (optional, 1 by default)
+-- number. this is the amount of the fontsize raise for font-sizing. Higher numbers will speed up the sizing, but the result is up to n-1 times smaler as it should be.
+--
 -- fontColor must be set with myParagraph:setTextColor({r,g,b,[alpha]}) resp. myParagraph:setTextColor({gray,[alpha]})
 --
 
@@ -101,6 +112,9 @@ function Wrapper:newParagraph(params)
 	local lineSpace	= 	params.lineSpace 	or 	0
 	local alignment	=	params.alignment	or "center"
 	
+	local fontSizeMin  	= params.fontSizeMin 	or 6
+	local incrementSize = params.incrementSize	or 1  
+	
 	local group = display.newGroup() 
 	local img
 	local cHeight
@@ -124,7 +138,7 @@ function Wrapper:newParagraph(params)
 		--delete all space-characters after and before line-breaks to avoid wrapping
 		for i=1, #t do
 			if string.byte(t,i) == 10 then
-				j=i+1
+				local j=i+1
 				while 1 do
 					if string.sub(t,j,j) == " " then
 						j = j+1
@@ -137,7 +151,7 @@ function Wrapper:newParagraph(params)
 		end
 		for i=1, #t do
 			if string.byte(t,i) == 10 then
-				j=i-1
+				local j=i-1
 				while 1 do
 					if string.sub(t,j,j) == " " then
 						j = j-1
@@ -246,7 +260,7 @@ function Wrapper:newParagraph(params)
 	
 	-- font-sizing if height is set
 	if params.height ~= nil then
-		fontSize = 6
+		fontSize = fontSizeMin
 		while 1 do
 			img = display.newRetinaText("H",0,0,font, fontSize)
 			cHeight = img.height * sFy
@@ -261,10 +275,10 @@ function Wrapper:newParagraph(params)
 				break
 			end
 			group:removeSelf()
-			fontSize = fontSize+1
+			fontSize = fontSize+incrementSize
 		end
 		group:removeSelf()
-		fontSize = fontSize-1
+		fontSize = fontSize-incrementSize
 		print("Wrapper Class:: calculated fontsize: " .. fontSize)
 		img = display.newRetinaText("H",0,0,font, fontSize)
 		cHeight = img.height * sFy
