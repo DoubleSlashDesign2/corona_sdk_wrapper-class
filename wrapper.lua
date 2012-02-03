@@ -3,7 +3,7 @@
 -- 						      Wrapper Class                           --
 ------------------------------------------------------------------------
 --
--- v1.21
+-- v1.22
 --
 ------------------------------------------------------------------------
 -- changelog
@@ -22,8 +22,10 @@
 -- 1) little corrections
 -- 2) added new Parameters for speed tweaking (see parameter list)
 --
+-- v1.22
+-- 1) added fontSizeMax parameter
 --
--- last change: 1.2.2012
+-- last change: 3.2.2012
 -- 
 ------------------------------------------------------------------------
 -- Restrictions
@@ -85,6 +87,9 @@
 -- fontSizeMin (optional, 6 by default)
 -- number. This value is the start value for font-sizing if a height is set. Increase the number for speed improvement, but use with care.
 --  
+-- fontSizeMax (optional, 0 by default)
+-- number. If you want to have a limit of the font-size, here you can set it up. 0 means no limit.
+--
 -- incrementSize (optional, 1 by default)
 -- number. this is the amount of the fontsize raise for font-sizing. Higher numbers will speed up the sizing, but the result is up to n-1 times smaler as it should be.
 --
@@ -113,14 +118,21 @@ function Wrapper:newParagraph(params)
 	local alignment	=	params.alignment	or "center"
 	
 	local fontSizeMin  	= params.fontSizeMin 	or 6
+	local fontSizeMax  	= params.fontSizeMax 	or 0
 	local incrementSize = params.incrementSize	or 1  
-	
-	local group = display.newGroup() 
+
+	--local group = display.newGroup() 
 	local img
 	local cHeight
 	local temp
 	local tempWidth = 0
-
+	local tempHeight
+	
+	if fontSizeMin > fontSizeMax and fontSizeMax ~= 0 then
+		print("Wrapper Class:: Error: fontSizeMin must be smaller then fontSizeMax")
+		return
+	end
+	
 	img = display.newRetinaText("H",0,0,font, fontSize)
 	cHeight = img.height * sFy
 	img:removeSelf()
@@ -271,15 +283,26 @@ function Wrapper:newParagraph(params)
 					tempWidth = group[i].width *sFx
 				end
 			end
-			if tempWidth > w or group.height > h then
-				break
-			end
+			tempHeight = group.height
 			group:removeSelf()
-			fontSize = fontSize+incrementSize
+			if tempWidth > w or tempHeight > h then
+				break
+			elseif fontSizeMax ~= 0 then
+				if fontSize > fontSizeMax then
+					break
+				else
+					fontSize = fontSize+incrementSize
+				end
+			else
+				fontSize = fontSize+incrementSize
+			end
 		end
-		group:removeSelf()
-		fontSize = fontSize-incrementSize
-		print("Wrapper Class:: calculated fontsize: " .. fontSize)
+		if fontSizeMax ~= 0 and fontSizeMax < fontSize then
+			fontSize = fontSizeMax
+		else
+			fontSize = fontSize-incrementSize
+		end
+		print("Wrapper Class:: calculated fontSize: " .. fontSize)
 		img = display.newRetinaText("H",0,0,font, fontSize)
 		cHeight = img.height * sFy
 		img:removeSelf()
