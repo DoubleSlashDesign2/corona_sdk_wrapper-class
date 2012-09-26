@@ -3,7 +3,7 @@
 --                            Wrapper Class                           --
 ------------------------------------------------------------------------
 --
--- v1.23
+-- v1.24
 --
 ------------------------------------------------------------------------
 -- changelog
@@ -29,7 +29,10 @@
 -- 1) fixed error caused by changes on coronas content-scaling, where size parameters are now relative to the content size.
 -- 2) small corrections
 --
--- last change: 1.9.2012
+-- v1.24
+-- 1) fixed error caused by missed linebreakes if the string is fetched from a file
+--
+-- last change: 26.9.2012
 -- 
 ------------------------------------------------------------------------
 -- Restrictions
@@ -134,6 +137,13 @@ function Wrapper:newParagraph(params)
         return
     end
     
+    -- this chunk is just if your string is fetched from a file, and contains line feeds "\n". Cause LFs will else not recognized. You can comment it for a little speed tweaking, if not needed.
+    if t:find("\\n") then
+        t = t:gsub("\\\\n", "\n_output_protect")
+        t = t:gsub("\\n", "\n")
+        t = t:gsub("\n_output_protect", "\\n")
+    end
+    
     img = display.newText("H",0,0,font, fontSize)
     cHeight = img.height 
     img:removeSelf()
@@ -197,7 +207,7 @@ function Wrapper:newParagraph(params)
                     index = i+1
                     tempS1 = ""
                 end
-            -- wrapping
+                -- wrapping
             elseif string.sub(t,i,i) == " " or string.sub(t,i,i) == "-" or i == #t then
                 tempS2 = tempS1 .. string.sub(t, index,i)
                 if tempS1 == "" then 
@@ -310,7 +320,7 @@ function Wrapper:newParagraph(params)
         img:removeSelf()
         group = wrap()	
         
-    -- else normal wrapping
+        -- else normal wrapping
     else
         group = wrap()
     end
